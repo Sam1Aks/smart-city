@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Entrance sensors</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 3px solid rgb(149, 150, 162);
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .filterDiv {
+            display: none;
+        }
+        .show {
+            display: table-row;
+        }
+        .btn {
+            border: none;
+            outline: none;
+            padding: 12px 16px;
+            background-color: #f1f1f1;
+            cursor: pointer;
+            margin: 2px;
+        }
+        .btn:hover {
+            background-color: #ddd;
+        }
+        .btn.active {
+            background-color: #666;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">Entrance information</div>
+    <div class="container">
+        <h2 id="title">Loading...</h2>
+        <div id="filters">
+            <div id="typeFilter">
+                <button class="btn active" onclick="filterSelection('all')">Show all</button>
+                <button class="btn" onclick="filterSelection('air_quality')">Air Quality</button>
+                <button class="btn" onclick="filterSelection('pressure')">Pressure</button>
+                <button class="btn" onclick="filterSelection('temperature')">Temperature</button>
+            </div>
+            <div id="statusFilter">
+                <button class="btn" onclick="filterSelection('green')">Green</button>
+                <button class="btn" onclick="filterSelection('yellow')">Yellow</button>
+                <button class="btn" onclick="filterSelection('red')">Red</button>
+            </div>
+        </div>
+        <table id="sensorTable">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Type</th>
+                    <th>Unit</th>
+                    <th>Min</th>
+                    <th>Max</th>
+                    <th>Floor</th>
+                    <th>Time</th>
+                    <th>Value</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+    <script>
+        function getQueryParams() {
+            const params = new URLSearchParams(window.location.search);
+            return { building: params.get("building"), entrance: params.get("entrance") };
+        }
+
+        const { building, entrance } = getQueryParams();
+
+        if (!building || !entrance) {
+            document.getElementById("title").innerText = "Error: the entrance is not specified!";
+        } else {
+            document.getElementById("title").innerText = `Information about the entrance ${entrance} of the building ${building}`;
+            fetch(`sensors.php?building=${building}&entrance=${entrance}`)
+                .then(response => response.json())
+                .then(data => {
+                    const tableBody = document.querySelector("#sensorTable tbody");
+                    tableBody.innerHTML = "";
+                    data.forEach(sensor => {
+                        let statusColor = sensor.status.toLowerCase().trim();
+                        let row = `<tr class="filterDiv ${sensor.sensor_type} ${statusColor}">
+                            <td>${sensor.name}</td>
+                            <td>${sensor.sensor_type}</td>
+                            <td>${sensor.unit}</td>
+                            <td>${sensor.normal_min}</td>
+                            <td>${sensor.normal_max}</td>
+                            <td>${sensor.floor}</td>
+                            <td>${sensor.time}</td>
+                            <td>${sensor.sensor_data}</td>
+                            <td style="background-color: ${statusColor};">${sensor.status}</td>
+                        </tr>`;
+                        tableBody.innerHTML += row;
+                    });
+                    filterSelection("all");
+                })
+                .catch(error => {
+                    console.error("Data upload error:", error);
+                    document.getElementById("title").innerText = "Server connection error!";
+                });
+        }
+
+        function filterSelection(filter) {
+            let rows = document.getElementsByClassName("filterDiv");
+            for (let i = 0; i < rows.length; i++) {
+                rows[i].classList.remove("show");
+                if (filter === "all" || rows[i].classList.contains(filter)) {
+                    rows[i].classList.add("show");
+                }
+            }
+            updateActiveButton(filter);
+        }
+
+        function updateActiveButton(filter) {
+            document.querySelectorAll(".btn").forEach(btn => btn.classList.remove("active"));
+            document.querySelectorAll(`.btn[onclick="filterSelection('${filter}')"]`).forEach(btn => btn.classList.add("active"));
+        }
+    </script>
+</body>
+</html>
