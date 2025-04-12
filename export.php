@@ -15,6 +15,7 @@ try {
     $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     if (!$rows) {
+        echo "Нет данных для экспорта.";
         exit;
     }
 
@@ -24,14 +25,23 @@ try {
     }
 
     $fp = fopen($csvFile, 'w');
-    if ($fp) {
-        fputcsv($fp, ['sensor_data', 'normal_min', 'normal_max', 'status']);
-        foreach ($rows as $row) {
-            fputcsv($fp, $row);
-        }
-        fclose($fp);
+    if (!$fp) {
+        echo "Не удалось открыть файл для записи.";
+        exit;
     }
-    echo json_encode(['status' => 'ok']);
+
+    fputcsv($fp, ['sensor_data', 'normal_min', 'normal_max', 'status']);
+
+    foreach ($rows as $row) {
+        fputcsv($fp, $row);
+    }
+
+    fclose($fp);
+
+    header('Content-Type: text/plain; charset=utf-8');
+    readfile($csvFile);
+
 } catch (PDOException $e) {
-    echo json_encode(['error' => $e->getMessage()]);
+    echo "Ошибка подключения к БД: " . $e->getMessage();
 }
+?>
