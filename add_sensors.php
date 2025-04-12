@@ -124,3 +124,5 @@ echo json_encode([
     "entrances" => $entrances_status,
     "buildings" => $buildings_status
 ], JSON_UNESCAPED_UNICODE);
+
+file_get_contents('https://jkh.system/export.php?nocache=' . time());
