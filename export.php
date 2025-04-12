@@ -11,8 +11,7 @@ try {
     $pdo = new PDO("mysql:host=$host;port=$port;dbname=$dbname;charset=utf8", $username, $password);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-
-    $stmt = $pdo->query("SELECT sensor_data, normal_min, normal_max FROM sensor_data");
+    $stmt = $pdo->query("SELECT sensor_data, sensor_type FROM sensor_data");
     $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     if (!$rows) {
@@ -31,7 +30,8 @@ try {
         exit;
     }
 
-    fputcsv($fp, ['sensor_data', 'normal_min', 'normal_max']);
+    fputcsv($fp, ['sensor_data', 'sensor_type']);
+
 
     foreach ($rows as $row) {
         fputcsv($fp, $row);
