@@ -5,7 +5,7 @@ $dbname = "smart_city";
 $username = "root";
 $password = "";
 
-$csvFile = _DIR_ . '/ml/sensor_data.csv';
+$csvFile = __DIR__ . '/ml/sensor_data.csv';
 
 try {
     $pdo = new PDO("mysql:host=$host;port=$port;dbname=$dbname;charset=utf8", $username, $password);
