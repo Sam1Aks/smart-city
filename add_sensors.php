@@ -19,7 +19,7 @@ function generateSensorData($min, $max) {
     $value = round(mt_rand($min * 10, $max * 10) / 10, 1);
     
     // Случайно решаем, нужно ли выходить за норму 
-    if (mt_rand(1, 100) <= 95) {
+    if (mt_rand(1, 100) <= 10) {
         $deviation = mt_rand(-10, 10) / 100; // Отклонение теперь от -10% до +10%
         $value = round($value * (1 + $deviation), 1);
     }
